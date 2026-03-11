@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+  <title>GudangUlat 🐛</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+  <style>
+    /* ─── TOKENS ─── */
+    :root{
+      --bg:#0e0c09; --bg2:#181410; --bg3:#221d17; --card:#1c1811;
+      --border:#3a3020; --border2:#4a3f2f;
+      --accent:#c97d30; --accent2:#e09a50; --gold:#edb84a;
+      --text:#e8ddd0; --text2:#9e9080; --text3:#6a6050;
+      --plus:#4caf7d; --minus:#e05c5c;
+      --btn-primary-bg: linear-gradient(135deg,#d4863a,#e8a050);
+      --btn-secondary-bg:#2a2218;
+      --nav-h:70px; --r:14px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+    html,body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;min-height:100vh;overflow-x:hidden}
+
+    /* ─── SCREENS ─── */
+    .screen{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 20px;background:var(--bg);overflow-y:auto}
+    .screen.hidden{display:none!important}
+    #login-screen{background:radial-gradient(ellipse at 50% -10%,#3a2010 0%,var(--bg) 60%)}
+    .login-logo{font-size:4rem;margin-bottom:6px;animation:pulse 3s ease-in-out infinite}
+    @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+    .login-brand{font-family:'Syne',sans-serif;font-weight:800;font-size:2.2rem;color:var(--accent2);letter-spacing:-1px}
+    .login-tagline{color:var(--text3);font-size:.8rem;margin-bottom:32px;text-align:center;line-height:1.4}
+    .login-box{width:100%;max-width:360px;background:var(--card);border:1px solid var(--border2);border-radius:20px;padding:24px 22px}
+    .login-title{font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;color:var(--accent2);margin-bottom:16px;text-align:center}
+    .login-footer-dev{margin-top:24px;text-align:center;font-size:.7rem;color:var(--text3);line-height:1.6}
+    .login-footer-dev a{color:var(--accent2);text-decoration:none;font-weight:500}
+
+    /* ─── APP SHELL ─── */
+    #app{position:relative;z-index:1;padding-bottom:calc(var(--nav-h) + 20px);min-height:100vh;display:none}
+    #content{padding:0 16px 16px;max-width:500px;margin:0 auto}
+
+    /* ─── TOPBAR ─── */
+    #topbar-wrap{position:sticky;top:0;z-index:30;background:rgba(14,12,9,.95);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--border)}
+    #topbar{max-width:500px;margin:0 auto;padding:11px 16px;display:flex;align-items:center;justify-content:space-between}
+    .topbar-brand{font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;color:var(--accent2);display:flex;align-items:center;gap:7px}
+    #btn-logout{
+      background:var(--bg3); border:1px solid var(--border2);
+      color:var(--text2); font-size:.72rem; padding:5px 12px;
+      border-radius:20px; cursor:pointer; font-family:'DM Sans',sans-serif;
+      transition:background .2s,color .2s;
+    }
+    #btn-logout:active{background:#3a2d1a;color:var(--accent2)}
+
+    /* ─── PAGE HEADER ─── */
+    .ph{display:flex;align-items:center;gap:12px;padding:20px 0 14px}
+    .ph-icon{font-size:2rem;line-height:1}
+    .ph-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.5rem;color:var(--accent2);letter-spacing:-.5px}
+    .ph-sub{font-size:.78rem;color:var(--text3);margin-top:2px}
+
+    /* ─── CARD ─── */
+    .card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;margin-bottom:10px}
+
+    /* ─── STAT GRID ─── */
+    .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+    .sc{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:4px}
+    .sc.accent{border-color:var(--accent);background:linear-gradient(135deg,#2c1f0e,#1c1811)}
+    .sc.pos{border-color:#2d6644;background:linear-gradient(135deg,#0e2218,#1c1811)}
+    .sc.neg{border-color:#6b2d2d;background:linear-gradient(135deg,#220e0e,#1c1811)}
+    .sc-icon{font-size:1.3rem}.sc-val{font-family:'Syne',sans-serif;font-weight:700;font-size:1.2rem;color:var(--accent2)}
+    .sc-lbl{font-size:.72rem;color:var(--text2)}
+    .sc-badge{font-size:.68rem;color:var(--text3);background:var(--bg3);padding:2px 8px;border-radius:20px;display:inline-block;margin-top:2px}
+
+    /* ─── SECTION LABEL ─── */
+    .sl{font-family:'Syne',sans-serif;font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--text3);margin:18px 0 8px;font-weight:600}
+
+    /* ─── BATCH CARDS ─── */
+    .bc{border-left:3px solid var(--accent)}
+    .bc.done{border-left-color:var(--text3);opacity:.82}
+    .bt{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:8px}
+    .ptb{background:rgba(201,125,48,.15);border:1px solid rgba(201,125,48,.35);color:var(--accent2);font-size:.78rem;font-weight:600;padding:3px 10px;border-radius:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:58%}
+    .tgt{font-size:.72rem;color:var(--text3);white-space:nowrap}
+    .bb{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:6px}
+    .bkg{font-size:.88rem;color:var(--text)}.bkg strong{color:var(--gold);font-size:.95rem}
+    .bnote{font-size:.73rem;color:var(--text3);font-style:italic}
+    .bst{font-size:.74rem;padding:3px 0;font-weight:500}
+    .bst.p{color:var(--accent2)}.bst.d{color:var(--plus)}
+    .bdel{
+      background:rgba(224,92,92,.12); border:1px solid rgba(224,92,92,.4);
+      color:var(--minus);font-size:.74rem;padding:4px 12px;
+      border-radius:8px;margin-top:6px;cursor:pointer;font-family:'DM Sans',sans-serif;
+    }
+    .brow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0}
+    .ri{text-align:center}
+    .ri-l{font-size:.64rem;color:var(--text3);text-transform:uppercase;letter-spacing:.06em}
+    .ri-v{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;color:var(--text)}
+    .asep{color:var(--text3);font-size:1rem}
+    .schip{font-size:.82rem;font-weight:600;padding:5px 12px;border-radius:20px;margin-left:auto}
+    .schip.pl{background:rgba(76,175,125,.15);border:1px solid rgba(76,175,125,.4);color:var(--plus)}
+    .schip.mn{background:rgba(224,92,92,.15);border:1px solid rgba(224,92,92,.4);color:var(--minus)}
+    .schip .pct{font-weight:400;font-size:.72rem;opacity:.8}
+
+    /* ─── FORMS ─── */
+    .fc{margin-bottom:20px}
+    .ft{font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;color:var(--accent2);margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+    .lbl{display:block;font-size:.7rem;color:var(--text2);margin-bottom:4px;margin-top:12px;text-transform:uppercase;letter-spacing:.06em;font-weight:500}
+    .inp{
+      width:100%;background:var(--bg2);
+      border:1.5px solid var(--border2);
+      color:var(--text);border-radius:10px;padding:11px 14px;
+      font-family:'DM Sans',sans-serif;font-size:.93rem;
+      transition:border-color .2s,background .2s;-webkit-appearance:none;
+    }
+    .inp:focus{outline:none;border-color:var(--accent);background:#1e1810}
+    .inp::placeholder{color:var(--text3)}
+    .inp option{background:var(--bg2)}
+
+    /* ─── BUTTONS ─── */
+    /* Primary — amber gradient, dark text, very clear */
+    .btn-p{
+      display:block;width:100%;margin-top:16px;
+      background:linear-gradient(135deg,#d4863a,#eba050);
+      border:none;border-radius:12px;
+      color:#0e0c09;font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;
+      padding:13px;cursor:pointer;letter-spacing:.02em;
+      box-shadow:0 2px 0 #7a3d0e, 0 4px 16px rgba(212,134,58,.35);
+      transition:transform .13s,box-shadow .13s;-webkit-appearance:none;
+    }
+    .btn-p:active{transform:translateY(2px);box-shadow:0 0 0 #7a3d0e,0 2px 8px rgba(212,134,58,.2)}
+
+    /* Secondary — visible dark amber tint */
+    .btn-s{
+      display:block;width:100%;margin-top:10px;
+      background:#2c2214;border:1.5px solid var(--border2);
+      border-radius:12px;color:var(--accent2);
+      font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:500;
+      padding:11px;cursor:pointer;-webkit-appearance:none;
+      transition:background .2s,border-color .2s;
+    }
+    .btn-s:active{background:#3a2e18;border-color:var(--accent)}
+
+    /* Danger — red tint */
+    .btn-danger{
+      display:inline-block;background:rgba(224,92,92,.14);
+      border:1.5px solid rgba(224,92,92,.45);
+      border-radius:10px;color:var(--minus);
+      font-size:.8rem;font-weight:600;padding:7px 14px;
+      cursor:pointer;font-family:'DM Sans',sans-serif;-webkit-appearance:none;
+      transition:background .2s;
+    }
+    .btn-danger:active{background:rgba(224,92,92,.28)}
+
+    /* ─── SELISIH PREVIEW ─── */
+    .sprev{margin-top:12px;padding:11px 16px;border-radius:10px;font-size:.88rem;text-align:center;display:none;font-weight:500}
+    .sprev.pos{background:rgba(76,175,125,.12);border:1px solid rgba(76,175,125,.35);color:var(--plus);display:block}
+    .sprev.neg{background:rgba(224,92,92,.12);border:1px solid rgba(224,92,92,.35);color:var(--minus);display:block}
+
+    /* ─── PETERNAK ─── */
+    .ptr{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .pti{display:flex;align-items:center;gap:12px}
+    .ptav{width:42px;height:42px;border-radius:13px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#0e0c09;font-family:'Syne',sans-serif;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+    .ptn{font-weight:600;font-size:.93rem;color:var(--text)}
+    .ptm{font-size:.72rem;color:var(--text3);margin-top:2px}
+
+    /* ─── EMPTY STATE ─── */
+    .empty{text-align:center;color:var(--text3);padding:32px 16px;font-size:.88rem;border:1.5px dashed var(--border2);border-radius:var(--r);margin-bottom:10px;background:rgba(255,255,255,.01)}
+
+    /* ─── BOTTOM NAV ─── */
+    #nav{
+      position:fixed;bottom:0;left:0;right:0;z-index:40;
+      height:var(--nav-h);
+      background:rgba(12,10,7,.97);
+      backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+      border-top:1px solid var(--border);
+      display:flex;align-items:center;justify-content:space-around;
+      padding-bottom:env(safe-area-inset-bottom,0px);
+    }
+    .nb{
+      display:flex;flex-direction:column;align-items:center;gap:3px;
+      background:none;border:none;cursor:pointer;
+      padding:6px 4px;border-radius:14px;
+      color:var(--text3);font-family:'DM Sans',sans-serif;font-size:.62rem;
+      transition:color .2s;flex:1;min-width:0;
+    }
+    .niw{
+      display:flex;justify-content:center;align-items:center;
+      width:44px;height:30px;border-radius:10px;
+      transition:background .2s;
+    }
+    .ni{font-size:1.25rem;line-height:1;display:block;transition:transform .2s}
+    /* ── ACTIVE STATE — very visible ── */
+    .nb.active{ color:#fff; }
+    .nb.active .niw{
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      box-shadow:0 2px 10px rgba(201,125,48,.5);
+    }
+    .nb.active .ni{ transform:scale(1.15); filter:brightness(0) invert(1); }
+
+    /* ─── TOAST ─── */
+    #toast{
+      position:fixed;bottom:calc(var(--nav-h) + 16px);left:50%;
+      transform:translateX(-50%);
+      background:#2a2318;border:1.5px solid var(--border2);
+      color:var(--text);padding:10px 22px;border-radius:30px;
+      font-size:.83rem;z-index:200;white-space:nowrap;
+      box-shadow:0 4px 24px rgba(0,0,0,.5);
+      pointer-events:none;opacity:0;transition:opacity .25s;
+    }
+    #toast.show{opacity:1}
+    #toast.ok{border-color:rgba(76,175,125,.5);color:var(--plus)}
+    #toast.err{border-color:rgba(224,92,92,.5);color:var(--minus)}
+
+    /* ─── INFO TABS ─── */
+    .tab-row{display:flex;gap:8px;margin-bottom:16px}
+    .tabb{
+      flex:1;padding:10px 6px;border-radius:11px;
+      background:var(--bg3);border:1.5px solid var(--border);
+      color:var(--text3);font-family:'Syne',sans-serif;
+      font-weight:700;font-size:.76rem;cursor:pointer;
+      transition:all .2s;-webkit-appearance:none;
+    }
+    /* ── ACTIVE TAB — very visible ── */
+    .tabb.active{
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      color:#0e0c09;border-color:transparent;
+      box-shadow:0 2px 12px rgba(201,125,48,.4);
+    }
+    .tabb:not(.active):active{background:#2e2518;border-color:var(--border2)}
+
+    /* ─── PANDUAN STEPS ─── */
+    .gs{display:flex;gap:14px;margin-bottom:16px}
+    .gsn{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#0e0c09;font-family:'Syne',sans-serif;font-weight:800;font-size:.9rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+    .gsb .gst{font-family:'Syne',sans-serif;font-weight:700;font-size:.9rem;color:var(--accent2);margin-bottom:5px}
+    .gsb p{font-size:.82rem;color:var(--text2);line-height:1.55}
+    .gstip{font-size:.77rem;color:var(--text3);background:rgba(201,125,48,.08);padding:7px 10px;border-radius:8px;margin-top:6px;border-left:2px solid var(--accent)}
+
+    /* ─── ABOUT / DEV ─── */
+    .fi{display:flex;align-items:flex-start;gap:10px;font-size:.83rem;color:var(--text2);margin-bottom:10px}
+    .ficon{font-size:1.1rem;flex-shrink:0;margin-top:1px}
+    .devc{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:18px;text-align:center}
+    .devav{width:60px;height:60px;border-radius:16px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#0e0c09;font-family:'Syne',sans-serif;font-weight:800;font-size:1.6rem;display:flex;align-items:center;justify-content:center;margin:0 auto 10px}
+    .devn{font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;color:var(--accent2)}
+    .devr{font-size:.75rem;color:var(--text3);margin-top:3px;margin-bottom:16px}
+    .dlb{
+      display:flex;align-items:center;justify-content:center;gap:8px;
+      padding:12px 16px;border-radius:12px;font-size:.85rem;font-weight:600;
+      text-decoration:none;cursor:pointer;border:1.5px solid transparent;
+      font-family:'Syne',sans-serif;width:100%;margin-bottom:9px;
+      transition:opacity .2s,transform .15s;-webkit-appearance:none;
+    }
+    .dlb:active{opacity:.75;transform:scale(.97)}
+    .bwa{background:#1a3d28;color:#5ecf8f;border-color:#2d6644}
+    .bdana{background:#162040;color:#70a8f0;border-color:#2a4080}
+    .dno{font-size:.73rem;color:var(--text3);text-align:center;margin-top:4px;line-height:1.5}
+    .cmsg{background:linear-gradient(135deg,#1e1608,#120f07);border:1px solid #3a2d10;border-radius:var(--r);padding:18px;margin-top:12px;text-align:center}
+    .cmsg p{font-size:.83rem;color:var(--text2);line-height:1.7}
+    .csign{font-family:'Syne',sans-serif;font-weight:700;font-size:.9rem;color:var(--gold);margin-top:10px}
+
+    /* ─── SETTINGS ─── */
+    .sec-title{font-family:'Syne',sans-serif;font-weight:700;font-size:.7rem;color:var(--accent);text-transform:uppercase;letter-spacing:.12em;margin-bottom:12px}
+    .sr{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+    .sr:last-child{border-bottom:none}
+    .sl2{font-size:.88rem;color:var(--text);font-weight:500}
+    .ssub{font-size:.72rem;color:var(--text3);margin-top:2px}
+    .cpf{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-top:12px;display:none}
+    .cpf.open{display:block}
+
+    /* ─── FOOTER ─── */
+    #app-footer{text-align:center;padding:20px 16px 8px;border-top:1px solid var(--border);max-width:500px;margin:0 auto}
+  </style>
+</head>
+<body>
+
+<!-- ══════════════ LOGIN ══════════════ -->
+<div id="login-screen" class="screen">
+  <div class="login-logo">🐛</div>
+  <div class="login-brand">GudangUlat</div>
+  <div class="login-tagline">Manajemen Stok Ulat Hongkong</div>
+
+  <div class="login-box">
+    <div id="ltitle" class="login-title">Masuk ke Aplikasi</div>
+
+    <!-- Form login -->
+    <div id="f-login">
+      <label class="lbl">Password</label>
+      <input id="ip" class="inp" type="password" placeholder="Masukkan password..." autocomplete="current-password"/>
+      <button class="btn-p" id="btn-login">🔓 Masuk</button>
+      <div id="lerr" style="color:var(--minus);font-size:.8rem;text-align:center;margin-top:12px;background:rgba(224,92,92,.1);border:1px solid rgba(224,92,92,.3);border-radius:8px;padding:8px;display:none">
+        ❌ Password salah. Coba lagi.
+      </div>
+    </div>
+
+    <!-- Form setup password baru -->
+    <div id="f-setup" style="display:none">
+      <p style="font-size:.82rem;color:var(--text2);margin-bottom:14px;text-align:center;line-height:1.5">
+        Selamat datang! Buat password untuk melindungi aplikasi ini.
+      </p>
+      <label class="lbl">Password Baru</label>
+      <input id="is1" class="inp" type="password" placeholder="Minimal 4 karakter..."/>
+      <label class="lbl">Ulangi Password</label>
+      <input id="is2" class="inp" type="password" placeholder="Ulangi password..."/>
+      <button class="btn-p" id="btn-setup">✅ Simpan & Masuk</button>
+      <div id="serr" style="color:var(--minus);font-size:.8rem;text-align:center;margin-top:10px;background:rgba(224,92,92,.1);border:1px solid rgba(224,92,92,.3);border-radius:8px;padding:8px;display:none"></div>
+    </div>
+  </div>
+
+  <div class="login-footer-dev">
+    Dibuat oleh <a href="https://wa.me/+6288991568151" target="_blank">Bayu Satrio</a> · © 2025
+  </div>
+</div>
+
+<!-- ══════════════ APP ══════════════ -->
+<div id="app">
+  <div id="topbar-wrap">
+    <div id="topbar">
+      <div class="topbar-brand"><span>🐛</span> GudangUlat</div>
+      <button id="btn-logout">Keluar</button>
+    </div>
+  </div>
+  <div id="content"></div>
+  <div id="app-footer">
+    <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:.85rem;color:var(--accent)">🐛 GudangUlat</div>
+    <div style="font-size:.67rem;color:var(--text3);margin-top:3px">© 2025 Bayu Satrio · All rights reserved</div>
+  </div>
+</div>
+
+<!-- ══════════════ BOTTOM NAV ══════════════ -->
+<nav id="nav" style="display:none">
+  <button class="nb" data-page="dashboard">
+    <div class="niw"><span class="ni">🏠</span></div>
+    <span>Dashboard</span>
+  </button>
+  <button class="nb" data-page="masuk">
+    <div class="niw"><span class="ni">⬇️</span></div>
+    <span>Masuk</span>
+  </button>
+  <button class="nb" data-page="keluar">
+    <div class="niw"><span class="ni">⬆️</span></div>
+    <span>Keluar</span>
+  </button>
+  <button class="nb" data-page="peternak">
+    <div class="niw"><span class="ni">👨‍🌾</span></div>
+    <span>Peternak</span>
+  </button>
+  <button class="nb" data-page="info">
+    <div class="niw"><span class="ni">ℹ️</span></div>
+    <span>Info</span>
+  </button>
+</nav>
+
+<div id="toast"></div>
+
+<!-- ══════════════ LOGIC ══════════════ -->
+<script type="module">
+  import { firebaseConfig }   from './firebase-config.js';
+  import { initializeApp }    from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getFirestore, collection, addDoc, doc, deleteDoc, query, orderBy, onSnapshot, serverTimestamp }
+    from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { getAuth, signInAnonymously, onAuthStateChanged }
+    from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+  const fbApp = initializeApp(firebaseConfig);
+  const db    = getFirestore(fbApp);
+  const auth  = getAuth(fbApp);
+
+  /* ── Storage keys ── */
+  const KP = 'gu_pw', KS = 'gu_sess', KPG = 'gu_page';
+  const TTL = 7 * 864e5; // 7 hari
+
+  /* ── App state ── */
+  let curPage = 'dashboard';
+  let infoTab = 'panduan';   // ← keeps track of active info sub-tab
+  let allPt = [], allM = [], allK = [];
+
+  /* ── Simple hash ── */
+  function h(s){ let r=5381; for(let i=0;i<s.length;i++) r=((r<<5)+r)^s.charCodeAt(i); return (r>>>0).toString(36); }
+
+  /* ── Session helpers ── */
+  const sessOK   = () => { const s=localStorage.getItem(KS); return !!s && Date.now()-+s < TTL; };
+  const saveSess = () => localStorage.setItem(KS, String(Date.now()));
+  const clearSess= () => localStorage.removeItem(KS);
+  const getPW    = () => localStorage.getItem(KP);
+
+  /* ════════════ LOGIN ════════════ */
+  function initLogin(){
+    if(!getPW()){
+      document.getElementById('ltitle').textContent = 'Buat Password';
+      document.getElementById('f-login').style.display = 'none';
+      document.getElementById('f-setup').style.display = 'block';
+    } else {
+      document.getElementById('ltitle').textContent = 'Masuk ke Aplikasi';
+      document.getElementById('f-login').style.display = 'block';
+      document.getElementById('f-setup').style.display = 'none';
+    }
+
+    document.getElementById('btn-login').onclick = () => {
+      const v = document.getElementById('ip').value;
+      if (!v) return;
+      if (h(v) === getPW()) {
+        saveSess(); bootApp();
+      } else {
+        document.getElementById('lerr').style.display = 'block';
+        document.getElementById('ip').value = '';
+        document.getElementById('ip').focus();
+      }
+    };
+    document.getElementById('ip').onkeydown = e => { if (e.key === 'Enter') document.getElementById('btn-login').click(); };
+
+    document.getElementById('btn-setup').onclick = () => {
+      const p1 = document.getElementById('is1').value;
+      const p2 = document.getElementById('is2').value;
+      const er = document.getElementById('serr');
+      if (p1.length < 4) { er.textContent = '❌ Password minimal 4 karakter.'; er.style.display='block'; return; }
+      if (p1 !== p2)     { er.textContent = '❌ Password tidak cocok.';          er.style.display='block'; return; }
+      localStorage.setItem(KP, h(p1));
+      saveSess(); bootApp();
+    };
+    ['is1','is2'].forEach(id => {
+      document.getElementById(id).onkeydown = e => { if(e.key==='Enter') document.getElementById('btn-setup').click(); };
+    });
+  }
+
+  document.getElementById('btn-logout').onclick = () => {
+    if (!confirm('Keluar dari aplikasi?')) return;
+    clearSess();
+    document.getElementById('app').style.display  = 'none';
+    document.getElementById('nav').style.display  = 'none';
+    document.getElementById('login-screen').classList.remove('hidden');
+    document.getElementById('ip').value = '';
+    document.getElementById('lerr').style.display = 'none';
+  };
+
+  /* ════════════ BOOT ════════════ */
+  function bootApp(){
+    document.getElementById('login-screen').classList.add('hidden');
+    document.getElementById('app').style.display = 'block';
+    document.getElementById('nav').style.display = 'flex';
+
+    signInAnonymously(auth).catch(e => toast('Firebase error: ' + e.code, 'err'));
+    onAuthStateChanged(auth, u => { if(u) startRT(); });
+
+    const lastPage = localStorage.getItem(KPG) || 'dashboard';
+    nav(lastPage, false);
+  }
+
+  /* ════════════ REALTIME ════════════ */
+  let rtOn = false;
+  function startRT(){
+    if (rtOn) return; rtOn = true;
+    onSnapshot(query(collection(db,'peternak'), orderBy('nama')),
+      s => { allPt = s.docs.map(d=>({id:d.id,...d.data()})); renderNow(); });
+    onSnapshot(query(collection(db,'masuk'), orderBy('tanggalMasuk','desc')),
+      s => { allM  = s.docs.map(d=>({id:d.id,...d.data()})); renderNow(); });
+    onSnapshot(query(collection(db,'keluar'), orderBy('tanggalKeluar','desc')),
+      s => { allK  = s.docs.map(d=>({id:d.id,...d.data()})); renderNow(); });
+  }
+
+  function renderNow(){
+    if (curPage==='dashboard') rDash();
+    else if (curPage==='masuk')    rMasuk();
+    else if (curPage==='keluar')   rKeluar();
+    else if (curPage==='peternak') rPt();
+    else if (curPage==='info')     rInfo();
+  }
+
+  /* ════════════ HELPERS ════════════ */
+  const fTgl = s => !s ? '-' : new Date(s).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'});
+  const fKg  = v => { const n=parseFloat(v)||0; return n>=100?(n/100).toFixed(2)+' kw':n.toFixed(1)+' kg'; };
+  const getK = mid => allK.find(k=>k.masukId===mid) || null;
+  const getPtN=id  => { const p=allPt.find(p=>p.id===id); return p?p.nama:id; };
+  const today= ()  => new Date().toISOString().slice(0,10);
+
+  /* ════════════ NAVIGATE ════════════ */
+  function nav(p, save=true){
+    curPage = p;
+    if (save) localStorage.setItem(KPG, p);
+    // Update nav button active states
+    document.querySelectorAll('.nb').forEach(b => b.classList.toggle('active', b.dataset.page === p));
+    renderNow();
+    window.scrollTo(0, 0);
+  }
+
+  /* ════════════ DASHBOARD ════════════ */
+  function rDash(){
+    const dg  = allM.filter(m => !getK(m.id));
+    const sl  = allM.filter(m =>  getK(m.id));
+    const skKg= dg.reduce ((s,m)=>s+(parseFloat(m.jumlahKg)||0), 0);
+    const tmKg= allM.reduce((s,m)=>s+(parseFloat(m.jumlahKg)||0), 0);
+    const tkKg= allK.reduce((s,k)=>s+(parseFloat(k.jumlahKg)||0), 0);
+    const tSel= sl.reduce ((s,m)=>{ const k=getK(m.id); return s+((parseFloat(k.jumlahKg)||0)-(parseFloat(m.jumlahKg)||0)); }, 0);
+
+    document.getElementById('content').innerHTML = `
+      <div class="ph"><div class="ph-icon">🏭</div>
+        <div><div class="ph-title">Dashboard</div><div class="ph-sub">Ringkasan stok gudang</div></div>
+      </div>
+
+      <div class="stat-grid">
+        <div class="sc accent">
+          <div class="sc-icon">📦</div>
+          <div class="sc-val">${fKg(skKg)}</div>
+          <div class="sc-lbl">Stok di Gudang</div>
+          <div class="sc-badge">${dg.length} batch aktif</div>
+        </div>
+        <div class="sc ${tSel>=0?'pos':'neg'}">
+          <div class="sc-icon">${tSel>=0?'📈':'📉'}</div>
+          <div class="sc-val">${tSel>=0?'+':''}${fKg(tSel)}</div>
+          <div class="sc-lbl">Selisih Total</div>
+          <div class="sc-badge">${sl.length} batch selesai</div>
+        </div>
+        <div class="sc">
+          <div class="sc-icon">⬇️</div>
+          <div class="sc-val">${fKg(tmKg)}</div>
+          <div class="sc-lbl">Total Masuk</div>
+        </div>
+        <div class="sc">
+          <div class="sc-icon">⬆️</div>
+          <div class="sc-val">${fKg(tkKg)}</div>
+          <div class="sc-lbl">Total Keluar</div>
+        </div>
+      </div>
+
+      <div class="sl">Batch Aktif di Gudang (${dg.length})</div>
+      ${dg.length===0?'<div class="empty">Gudang kosong 🏭</div>':''}
+      ${dg.map(m=>`
+        <div class="card bc">
+          <div class="bt">
+            <span class="ptb">${getPtN(m.peternakId)}</span>
+            <span class="tgt">${fTgl(m.tanggalMasuk)}</span>
+          </div>
+          <div class="bb">
+            <span class="bkg">Masuk: <strong>${fKg(m.jumlahKg)}</strong></span>
+            ${m.catatan?`<span class="bnote">${m.catatan}</span>`:''}
+          </div>
+          <div class="bst p">⏳ Menunggu penimbangan keluar</div>
+        </div>`).join('')}
+
+      <div class="sl" style="margin-top:20px">Riwayat Terakhir</div>
+      ${sl.length===0?'<div class="empty">Belum ada batch selesai</div>':''}
+      ${sl.slice(0,5).map(m=>{
+        const k=getK(m.id);
+        const sel=(parseFloat(k.jumlahKg)||0)-(parseFloat(m.jumlahKg)||0);
+        const pct=m.jumlahKg>0?((sel/m.jumlahKg)*100).toFixed(1):0;
+        return `
+        <div class="card bc done">
+          <div class="bt">
+            <span class="ptb">${getPtN(m.peternakId)}</span>
+            <span class="tgt">${fTgl(m.tanggalMasuk)} → ${fTgl(k.tanggalKeluar)}</span>
+          </div>
+          <div class="brow">
+            <div class="ri"><div class="ri-l">Masuk</div><div class="ri-v">${fKg(m.jumlahKg)}</div></div>
+            <div class="asep">→</div>
+            <div class="ri"><div class="ri-l">Keluar</div><div class="ri-v">${fKg(k.jumlahKg)}</div></div>
+            <div class="schip ${sel>=0?'pl':'mn'}">${sel>=0?'▲':'▼'} ${fKg(Math.abs(sel))}<span class="pct"> (${pct}%)</span></div>
+          </div>
+        </div>`;
+      }).join('')}
+    `;
+  }
+
+  /* ════════════ PETERNAK ════════════ */
+  function rPt(){
+    document.getElementById('content').innerHTML = `
+      <div class="ph"><div class="ph-icon">👨‍🌾</div>
+        <div><div class="ph-title">Peternak</div><div class="ph-sub">Kelola daftar peternak</div></div>
+      </div>
+      <div class="card fc">
+        <div class="ft">Tambah Peternak Baru</div>
+        <label class="lbl">Nama Peternak</label>
+        <input id="iptn" class="inp" type="text" placeholder="Contoh: Naja, Pak Budi..." maxlength="50"/>
+        <button class="btn-p" id="btn-apt">+ Tambah Peternak</button>
+      </div>
+      <div class="sl">${allPt.length} Peternak Terdaftar</div>
+      ${allPt.length===0?'<div class="empty">Belum ada peternak 👨‍🌾</div>':''}
+      ${allPt.map(p=>{
+        const bs=allM.filter(m=>m.peternakId===p.id);
+        const ak=bs.filter(m=>!getK(m.id)).length;
+        return `
+        <div class="card ptr">
+          <div class="pti">
+            <div class="ptav">${p.nama.charAt(0).toUpperCase()}</div>
+            <div>
+              <div class="ptn">${p.nama}</div>
+              <div class="ptm">${bs.length} batch total · ${ak} aktif</div>
+            </div>
+          </div>
+          <button class="btn-danger" onclick="window._dPt('${p.id}','${p.nama.replace(/'/g,"\\'").replace(/"/g,"&quot;")}')">🗑 Hapus</button>
+        </div>`;
+      }).join('')}
+    `;
+
+    document.getElementById('btn-apt').onclick = async () => {
+      const n = document.getElementById('iptn').value.trim();
+      if (!n) return toast('Masukkan nama peternak', 'err');
+      if (allPt.find(p=>p.nama.toLowerCase()===n.toLowerCase())) return toast('Nama sudah terdaftar', 'err');
+      await addDoc(collection(db,'peternak'), {nama:n, createdAt:serverTimestamp()});
+      document.getElementById('iptn').value = '';
+      toast('Peternak ditambahkan ✓');
+    };
+    document.getElementById('iptn').onkeydown = e => { if(e.key==='Enter') document.getElementById('btn-apt').click(); };
+  }
+  window._dPt = async (id, n) => {
+    if (allM.find(m=>m.peternakId===id)) return toast('Tidak bisa hapus: ada data masuk', 'err');
+    if (!confirm(`Hapus peternak "${n}"?`)) return;
+    await deleteDoc(doc(db,'peternak',id));
+    toast('Dihapus');
+  };
+
+  /* ════════════ MASUK ════════════ */
+  function rMasuk(){
+    document.getElementById('content').innerHTML = `
+      <div class="ph"><div class="ph-icon">⬇️</div>
+        <div><div class="ph-title">Masuk Gudang</div><div class="ph-sub">Catat panenan masuk dari peternak</div></div>
+      </div>
+      <div class="card fc">
+        <div class="ft">Catat Panen Masuk</div>
+        <label class="lbl">Peternak</label>
+        <select id="smp" class="inp">
+          <option value="">-- Pilih Peternak --</option>
+          ${allPt.map(p=>`<option value="${p.id}">${p.nama}</option>`).join('')}
+        </select>
+        <label class="lbl">Tanggal Masuk</label>
+        <input id="imt" class="inp" type="date" value="${today()}"/>
+        <label class="lbl">Berat Masuk (kg)</label>
+        <input id="imk" class="inp" type="number" min="0.1" step="0.1" placeholder="Contoh: 100"/>
+        <label class="lbl">Catatan (opsional)</label>
+        <input id="imn" class="inp" type="text" placeholder="Catatan tambahan..."/>
+        <button class="btn-p" id="btn-am">⬇️ Simpan Masuk Gudang</button>
+      </div>
+      <div class="sl">Semua Data Masuk (${allM.length})</div>
+      ${allM.length===0?'<div class="empty">Belum ada data masuk</div>':''}
+      ${allM.map(m=>{
+        const k=getK(m.id);
+        return `
+        <div class="card bc ${k?'done':''}">
+          <div class="bt">
+            <span class="ptb">${getPtN(m.peternakId)}</span>
+            <span class="tgt">${fTgl(m.tanggalMasuk)}</span>
+          </div>
+          <div class="bb">
+            <span class="bkg">Masuk: <strong>${fKg(m.jumlahKg)}</strong></span>
+            ${m.catatan?`<span class="bnote">${m.catatan}</span>`:''}
+          </div>
+          ${k
+            ?`<div class="bst d">✅ Keluar ${fTgl(k.tanggalKeluar)} · ${fKg(k.jumlahKg)}</div>`
+            :`<div class="bst p">⏳ Masih di gudang</div>
+              <button class="bdel" onclick="window._dM('${m.id}')">🗑 Hapus</button>`}
+        </div>`;
+      }).join('')}
+    `;
+
+    document.getElementById('btn-am').onclick = async () => {
+      const pid = document.getElementById('smp').value;
+      const tgl = document.getElementById('imt').value;
+      const kg  = parseFloat(document.getElementById('imk').value);
+      const cat = document.getElementById('imn').value.trim();
+      if (!pid) return toast('Pilih peternak dulu', 'err');
+      if (!tgl) return toast('Isi tanggal masuk', 'err');
+      if (!kg || kg<=0) return toast('Isi berat yang valid', 'err');
+      await addDoc(collection(db,'masuk'), {peternakId:pid, tanggalMasuk:tgl, jumlahKg:kg, catatan:cat, createdAt:serverTimestamp()});
+      document.getElementById('smp').value = '';
+      document.getElementById('imk').value = '';
+      document.getElementById('imn').value = '';
+      toast('Data masuk disimpan ✓');
+    };
+  }
+  window._dM = async id => {
+    if (!confirm('Hapus data masuk ini?')) return;
+    await deleteDoc(doc(db,'masuk',id));
+    toast('Dihapus');
+  };
+
+  /* ════════════ KELUAR ════════════ */
+  function rKeluar(){
+    const bk = allM.filter(m => !getK(m.id));
+    document.getElementById('content').innerHTML = `
+      <div class="ph"><div class="ph-icon">⬆️</div>
+        <div><div class="ph-title">Keluar Gudang</div><div class="ph-sub">Catat penimbangan & pengiriman</div></div>
+      </div>
+      <div class="card fc">
+        <div class="ft">Catat Pengiriman Keluar</div>
+        <label class="lbl">Pilih Batch (panen yang dikirim)</label>
+        <select id="skb" class="inp">
+          <option value="">-- Pilih Batch --</option>
+          ${bk.map(m=>`<option value="${m.id}">${getPtN(m.peternakId)} · ${fTgl(m.tanggalMasuk)} · ${fKg(m.jumlahKg)}</option>`).join('')}
+        </select>
+        <label class="lbl">Tanggal Keluar / Kirim</label>
+        <input id="ikt" class="inp" type="date" value="${today()}"/>
+        <label class="lbl">Berat Keluar (kg) — timbang sekarang</label>
+        <input id="ikk" class="inp" type="number" min="0.1" step="0.1" placeholder="Hasil timbang..."/>
+        <div id="sprv" class="sprev"></div>
+        <label class="lbl">Catatan (opsional)</label>
+        <input id="ikn" class="inp" type="text" placeholder="Catatan pengiriman..."/>
+        <button class="btn-p" id="btn-ak">✈️ Simpan Pengiriman</button>
+      </div>
+      <div class="sl">Riwayat Pengiriman (${allK.length})</div>
+      ${allK.length===0?'<div class="empty">Belum ada pengiriman tercatat</div>':''}
+      ${allK.map(k=>{
+        const m=allM.find(x=>x.id===k.masukId);
+        if(!m) return '';
+        const sel=(parseFloat(k.jumlahKg)||0)-(parseFloat(m.jumlahKg)||0);
+        const pct=m.jumlahKg>0?((sel/m.jumlahKg)*100).toFixed(1):0;
+        return `
+        <div class="card bc done">
+          <div class="bt">
+            <span class="ptb">${getPtN(m.peternakId)}</span>
+            <span class="tgt">${fTgl(m.tanggalMasuk)} → ${fTgl(k.tanggalKeluar)}</span>
+          </div>
+          <div class="brow">
+            <div class="ri"><div class="ri-l">Masuk</div><div class="ri-v">${fKg(m.jumlahKg)}</div></div>
+            <div class="asep">→</div>
+            <div class="ri"><div class="ri-l">Keluar</div><div class="ri-v">${fKg(k.jumlahKg)}</div></div>
+            <div class="schip ${sel>=0?'pl':'mn'}">${sel>=0?'▲':'▼'} ${fKg(Math.abs(sel))}<span class="pct"> (${pct}%)</span></div>
+          </div>
+          ${k.catatan?`<div class="bnote" style="margin-top:4px">${k.catatan}</div>`:''}
+        </div>`;
+      }).join('')}
+    `;
+
+    const upd = () => {
+      const bid=document.getElementById('skb').value;
+      const kg =parseFloat(document.getElementById('ikk').value);
+      const el =document.getElementById('sprv');
+      if (bid && kg>0) {
+        const m=allM.find(x=>x.id===bid);
+        if (m) {
+          const s=kg-(parseFloat(m.jumlahKg)||0);
+          const p=m.jumlahKg>0?((s/m.jumlahKg)*100).toFixed(1):0;
+          el.className=`sprev ${s>=0?'pos':'neg'}`;
+          el.innerHTML=`${s>=0?'📈 Bertambah':'📉 Menyusut'} <strong>${fKg(Math.abs(s))}</strong> (${p}%)`;
+        }
+      } else {
+        el.className='sprev'; el.innerHTML='';
+      }
+    };
+    document.getElementById('skb').onchange = upd;
+    document.getElementById('ikk').oninput  = upd;
+
+    document.getElementById('btn-ak').onclick = async () => {
+      const mid=document.getElementById('skb').value;
+      const tgl=document.getElementById('ikt').value;
+      const kg =parseFloat(document.getElementById('ikk').value);
+      const cat=document.getElementById('ikn').value.trim();
+      if (!mid) return toast('Pilih batch dulu', 'err');
+      if (!tgl) return toast('Isi tanggal keluar', 'err');
+      if (!kg||kg<=0) return toast('Isi berat yang valid', 'err');
+      const m=allM.find(x=>x.id===mid);
+      const selisih=kg-(parseFloat(m.jumlahKg)||0);
+      await addDoc(collection(db,'keluar'), {masukId:mid, tanggalKeluar:tgl, jumlahKg:kg, selisih, catatan:cat, createdAt:serverTimestamp()});
+      toast('Pengiriman disimpan ✓');
+    };
+  }
+
+  /* ════════════ INFO ════════════ */
+  function rInfo(){
+    document.getElementById('content').innerHTML = `
+      <div class="ph"><div class="ph-icon">ℹ️</div>
+        <div><div class="ph-title">Info</div><div class="ph-sub">Panduan & tentang aplikasi</div></div>
+      </div>
+      <div class="tab-row" id="tab-row-info">
+        <button class="tabb" data-tab="panduan">📖 Panduan</button>
+        <button class="tabb" data-tab="about">👤 Tentang</button>
+        <button class="tabb" data-tab="setelan">⚙️ Setelan</button>
+      </div>
+      <div id="itc"></div>
+    `;
+    // Attach click handler to LIVE DOM elements (not inline onclick strings)
+    document.querySelectorAll('#tab-row-info .tabb').forEach(btn => {
+      btn.onclick = () => switchInfoTab(btn.dataset.tab);
+    });
+    switchInfoTab(infoTab);
+  }
+
+  /* ── CRITICAL FIX: switchInfoTab updates both state + button classes + content ── */
+  function switchInfoTab(tab){
+    infoTab = tab;
+    // Update tab button active classes
+    document.querySelectorAll('#tab-row-info .tabb').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.tab === tab);
+    });
+    // Render tab content
+    const el = document.getElementById('itc');
+    if (!el) return;
+
+    if (tab === 'panduan') el.innerHTML = `
+      <div class="card" style="margin-bottom:10px">
+        <p style="font-size:.85rem;color:var(--text2);line-height:1.65">
+          Aplikasi pencatatan stok ulat hongkong untuk pengepul. Catat panen masuk,
+          pantau di gudang, lalu catat saat dikirim ke konsumen — selisih dihitung otomatis.
+        </p>
+      </div>
+      <div class="sl">Cara Menggunakan</div>
+      <div class="card">
+        ${[
+          ['1','Daftarkan Peternak',
+           'Buka menu <strong>Peternak</strong> → ketik nama → Tambah. Ulangi untuk semua peternak Anda.',
+           '💡 Nama tidak boleh duplikat. Peternak hanya bisa dihapus jika belum ada data masuk.'],
+          ['2','Catat Panen Masuk',
+           'Buka menu <strong>Masuk</strong> → pilih peternak → isi tanggal panen → isi berat kg → Simpan.',
+           '💡 Satu kali panen = satu batch. Misal: ambil 100 kg dari Naja tgl 1 Jan = 1 batch baru.'],
+          ['3','Pantau Dashboard',
+           'Buka <strong>Dashboard</strong> untuk melihat semua batch aktif di gudang beserta beratnya.',
+           '💡 Batch tampil sebagai "Aktif" selama belum dicatat keluarnya.'],
+          ['4','Catat Pengiriman Keluar',
+           'Buka <strong>Keluar</strong> → pilih batch → isi berat timbang sekarang → isi tanggal kirim → Simpan.',
+           '💡 Aplikasi langsung hitung selisih dan persentase bertambah/menyusut secara otomatis.'],
+          ['5','Baca Hasil Selisih',
+           'Lihat di Dashboard atau menu Keluar untuk riwayat pengiriman dengan selisih berat lengkap.',
+           '💡 ▲ = bertambah (bagus!), ▼ = menyusut. Ulat sehat bisa tumbuh 10–30%.']
+        ].map(([n,t,p,tip]) => `
+          <div class="gs">
+            <div class="gsn">${n}</div>
+            <div class="gsb">
+              <div class="gst">${t}</div>
+              <p>${p}</p>
+              <div class="gstip">${tip}</div>
+            </div>
+          </div>`).join('')}
+      </div>
+      <div class="sl">Keterangan Satuan</div>
+      <div class="card">
+        <p style="font-size:.82rem;color:var(--text2);line-height:1.8">
+          📌 Semua input dalam <strong>kilogram (kg)</strong>.<br>
+          📌 Tampilan otomatis konversi ke <strong>kwintal (kw)</strong> jika ≥ 100 kg.<br>
+          📌 Contoh: 150 kg = 1.50 kw &nbsp;·&nbsp; 300 kg = 3.00 kw
+        </p>
+      </div>
+    `;
+
+    else if (tab === 'about') el.innerHTML = `
+      <div style="text-align:center;padding:16px 0 20px">
+        <div style="font-size:3.5rem;margin-bottom:8px">🐛</div>
+        <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.8rem;color:var(--accent2)">GudangUlat</div>
+        <div style="font-size:.72rem;color:var(--text3);margin-top:3px">Versi 1.0 &nbsp;·&nbsp; 2025</div>
+        <p style="font-size:.83rem;color:var(--text2);line-height:1.65;margin-top:12px;text-align:left">
+          Aplikasi manajemen stok ulat hongkong yang ringan, cepat, dan nyaman dipakai dari HP.
+          Dibuat khusus untuk pengepul yang butuh pencatatan sederhana namun akurat dan real-time.
+        </p>
+      </div>
+      <div class="sl">Fitur Aplikasi</div>
+      <div class="card" style="margin-bottom:12px">
+        ${[
+          ['👨‍🌾','Kelola daftar peternak dengan mudah'],
+          ['⬇️','Catat panen masuk dari banyak peternak berbeda'],
+          ['⬆️','Catat pengiriman keluar ke konsumen'],
+          ['📊','Hitung selisih berat & persentase otomatis'],
+          ['🏭','Dashboard stok real-time'],
+          ['☁️','Data tersimpan di cloud Firebase — aman & tidak hilang'],
+          ['🔐','Login password pribadi + sesi 7 hari'],
+          ['📱','Mobile-first, nyaman dipakai dari HP'],
+        ].map(([i,t]) => `<div class="fi"><span class="ficon">${i}</span><span>${t}</span></div>`).join('')}
+      </div>
+      <div class="sl">Developer</div>
+      <div class="devc">
+        <div class="devav">B</div>
+        <div class="devn">Bayu Satrio</div>
+        <div class="devr">Developer &amp; Designer · GudangUlat</div>
+        <a class="dlb bwa" href="https://wa.me/+6288991568151" target="_blank">💬 Hubungi via WhatsApp</a>
+        <button class="dlb bdana" onclick="window._dona()">💙 Donasi via DANA</button>
+        <div class="dno">Ada request fitur, kendala, atau butuh custom aplikasi?<br>Langsung hubungi WA developer di atas.</div>
+      </div>
+      <div class="cmsg">
+        <p>
+          Terima kasih sudah menggunakan <strong>GudangUlat</strong>. 🐛<br>
+          Semoga usaha budidaya ulat hongkong Anda semakin berkembang dan menguntungkan.<br>
+          Jika aplikasi ini membantu, donasi kecil sangat berarti bagi developer.
+        </p>
+        <div class="csign">— Bayu Satrio, Developer</div>
+      </div>
+    `;
+
+    else /* setelan */ el.innerHTML = `
+      <div class="card" style="margin-bottom:10px">
+        <div class="sec-title">Keamanan</div>
+        <div class="sr">
+          <div><div class="sl2">Ganti Password</div><div class="ssub">Ubah password login aplikasi</div></div>
+          <button class="btn-s" style="width:auto;margin-top:0;padding:7px 16px;font-size:.8rem"
+            onclick="document.getElementById('cpf').classList.toggle('open')">Ubah</button>
+        </div>
+        <div id="cpf" class="cpf">
+          <label class="lbl">Password Lama</label>
+          <input id="icp1" class="inp" type="password" placeholder="Password saat ini..."/>
+          <label class="lbl">Password Baru</label>
+          <input id="icp2" class="inp" type="password" placeholder="Minimal 4 karakter..."/>
+          <label class="lbl">Ulangi Password Baru</label>
+          <input id="icp3" class="inp" type="password" placeholder="Ulangi password baru..."/>
+          <button class="btn-p" style="margin-top:14px" onclick="window._gp()">💾 Simpan Password Baru</button>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:10px">
+        <div class="sec-title">Sesi</div>
+        <div class="sr">
+          <div><div class="sl2">Durasi Sesi</div><div class="ssub">Aktif selama 7 hari sejak login terakhir</div></div>
+        </div>
+        <div class="sr">
+          <div><div class="sl2">Keluar dari Aplikasi</div><div class="ssub">Kembali ke halaman login</div></div>
+          <button class="btn-danger" style="padding:7px 16px;font-size:.8rem"
+            onclick="document.getElementById('btn-logout').click()">Keluar</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="sec-title">Info Aplikasi</div>
+        <div class="sr"><div><div class="sl2">Versi</div><div class="ssub">GudangUlat v1.0</div></div></div>
+        <div class="sr"><div><div class="sl2">Database</div><div class="ssub">Firebase Firestore · ganden-d43e5</div></div></div>
+        <div class="sr" style="border:none"><div><div class="sl2">Developer</div><div class="ssub">Bayu Satrio · wa.me/+6288991568151</div></div></div>
+      </div>
+    `;
+  }
+
+  window._dona = () => alert('💙 Donasi via DANA\n\nNomor  : 088987024458\nNama   : Bayu Satrio\n\nTerima kasih atas dukungannya! 🙏');
+
+  window._gp = () => {
+    const o=document.getElementById('icp1').value;
+    const n=document.getElementById('icp2').value;
+    const u=document.getElementById('icp3').value;
+    if (h(o) !== getPW()) return toast('Password lama salah', 'err');
+    if (n.length < 4)     return toast('Minimal 4 karakter', 'err');
+    if (n !== u)          return toast('Password baru tidak cocok', 'err');
+    localStorage.setItem(KP, h(n));
+    toast('Password berhasil diubah ✓');
+    document.getElementById('cpf').classList.remove('open');
+    ['icp1','icp2','icp3'].forEach(id => { document.getElementById(id).value = ''; });
+  };
+
+  /* ════════════ TOAST ════════════ */
+  let tt;
+  function toast(msg, type='ok'){
+    const el=document.getElementById('toast');
+    el.textContent=msg; el.className=`toast show ${type}`;
+    clearTimeout(tt); tt=setTimeout(()=>{ el.className='toast'; }, 2600);
+  }
+
+  /* ════════════ INIT ════════════ */
+  window.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.nb').forEach(b => { b.onclick = () => nav(b.dataset.page); });
+    sessOK() ? bootApp() : initLogin();
+  });
+</script>
+</body>
+</html>
